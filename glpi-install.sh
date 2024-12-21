@@ -275,7 +275,7 @@ EOF
         a2ensite glpi.conf > /dev/null 2>&1
         # Restart d'apache
         systemctl restart apache2 > /dev/null 2>&1
-        sudo -u www-data php ${REP_GLPI}bin/console db:install --db-host="localhost" --db-port=3306 --db-name=glpi --db-user=glpi_user --db-password="${SQLGLPIPWD}" --default-language="${LANG}" --force --no-telemetry --quiet --no-interaction
+        www-data php ${REP_GLPI}bin/console db:install --db-host="localhost" --db-port=3306 --db-name=glpi --db-user=glpi_user --db-password="${SQLGLPIPWD}" --default-language="${LANG}" --force --no-telemetry --quiet --no-interaction
     elif [[ "${ID}" =~ ^(almalinux|centos|rocky|rhel)$ ]]; then
         chown -R nginx:nginx /etc/glpi
         chmod -R 777 /etc/glpi
@@ -338,7 +338,7 @@ EOF
     restorecon -R ${REP_GLPI}marketplace > /dev/null 2>&1
     # Restart de Nginx et php-fpm
     systemctl restart nginx php-fpm
-    sudo -u nginx php ${REP_GLPI}bin/console db:install --db-host="localhost" --db-port=3306 --db-name=glpi --db-user=glpi_user --db-password="${SQLGLPIPWD}" --default-language="${LANG}" --force --no-telemetry --quiet --no-interaction 
+    nginx php ${REP_GLPI}bin/console db:install --db-host="localhost" --db-port=3306 --db-name=glpi --db-user=glpi_user --db-password="${SQLGLPIPWD}" --default-language="${LANG}" --force --no-telemetry --quiet --no-interaction 
     fi
     sleep 5
     rm -rf ${REP_GLPI}install/install.php
@@ -462,16 +462,16 @@ function maintenance(){
     if [ "$1" == "1" ]; then
         warn "Mode maintenance activer"
         if [[ "${ID}" =~ ^(debian|ubuntu)$ ]]; then
-            sudo www-data php ${REP_GLPI}bin/console glpi:maintenance:enable  > /dev/null 2>&1
+             www-data php ${REP_GLPI}bin/console glpi:maintenance:enable  > /dev/null 2>&1
         elif [[ "${ID}" =~ ^(almalinux|centos|rocky|rhel)$ ]]; then
-            sudo nginx php ${REP_GLPI}bin/console glpi:maintenance:enable  > /dev/null 2>&1
+             nginx php ${REP_GLPI}bin/console glpi:maintenance:enable  > /dev/null 2>&1
         fi
     elif [ "$1" == "0" ]; then
         info "Mode maintenance désactiver"
         if [[ "${ID}" =~ ^(debian|ubuntu)$ ]]; then
-            sudo www-data php ${REP_GLPI}bin/console glpi:maintenance:disable  > /dev/null 2>&1
+             www-data php ${REP_GLPI}bin/console glpi:maintenance:disable  > /dev/null 2>&1
         elif [[ "${ID}" =~ ^(almalinux|centos|rocky|rhel)$ ]]; then
-            sudo nginx php ${REP_GLPI}bin/console glpi:maintenance:disable  > /dev/null 2>&1
+             nginx php ${REP_GLPI}bin/console glpi:maintenance:disable  > /dev/null 2>&1
         fi
     fi
 }
@@ -507,14 +507,14 @@ EOF
         info "Mise à jour de la base de donnée du site"
         if [[ "${ID}" =~ ^(debian|ubuntu)$ ]]; then
             chown -R www-data:www-data ${REP_GLPI} > /dev/null 2>&1
-            sudo www-data php ${REP_GLPI}bin/console db:update --quiet --no-interaction --force  > /dev/null 2>&1
+             www-data php ${REP_GLPI}bin/console db:update --quiet --no-interaction --force  > /dev/null 2>&1
         elif [[ "${ID}" =~ ^(almalinux|centos|rocky|rhel)$ ]]; then
             chown -R nginx:nginx ${REP_GLPI} > /dev/null 2>&1
             semanage fcontext -a -t httpd_sys_rw_content_t "${REP_GLPI}(/.*)?" > /dev/null 2>&1
             semanage fcontext -a -t httpd_sys_rw_content_t "${REP_GLPI}marketplace" > /dev/null 2>&1
             restorecon -Rv ${REP_GLPI} > /dev/null 2>&1
             restorecon -Rv ${REP_GLPI}marketplace > /dev/null 2>&1
-            sudo nginx php ${REP_GLPI}bin/console db:update --quiet --no-interaction --force  > /dev/null 2>&1
+             nginx php ${REP_GLPI}bin/console db:update --quiet --no-interaction --force  > /dev/null 2>&1
         fi
         
         info "Nettoyage de la mise à jour"
